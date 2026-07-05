@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -61,6 +63,26 @@ public class Zoo {
             LOG.warning(() -> "Kein Gehege mit dem Namen " + name + " gefunden.");
         } else {
             LOG.fine(() -> "Gehege gefunden: " + result.getName());
+        }
+
+        return result;
+    }
+
+    public Optional<Animal> findAnimalByName(String animalName) {
+        Objects.requireNonNull(animalName);
+
+        LOG.info(() -> "findAnimalByName aufgerufen mit Name: " + animalName);
+
+        Optional<Animal> result = enclosures.stream()
+                .flatMap(enclosure -> enclosure.findAnimalByName(animalName)
+                        .stream()
+                        .map(Animal.class::cast))
+                .findFirst();
+
+        if (result.isEmpty()) {
+            LOG.warning(() -> "Kein Tier mit dem Namen " + animalName + " im Zoo gefunden.");
+        } else {
+            LOG.fine(() -> "Tier gefunden: " + result.get().name());
         }
 
         return result;
@@ -249,7 +271,7 @@ public class Zoo {
         return "Other Animals";
     }
 
-     static Logger getLogger() {
+    static Logger getLogger() {
         return LOG;
     }
 }

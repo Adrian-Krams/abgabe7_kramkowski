@@ -1,7 +1,11 @@
 package zoo;
 
 import zoo.animal.*;
+import zoo.command.AddAnimalCommand;
+import zoo.command.CommandManager;
+import zoo.command.RemoveAnimalCommand;
 
+import java.util.Optional;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.SimpleFormatter;
@@ -66,6 +70,80 @@ public class Main {
 
         // Das hier waere ein Compilerfehler, weil CatHouse nur Lion erlaubt:
         // catHouse.add(new Tiger("Shir Khan"));
+
+
+        // =====================================================
+        // Aufgabe 1: Optional<T> testen
+        // =====================================================
+
+        System.out.println();
+        System.out.println("----- Aufgabe 1: Optional testen -----");
+
+        Optional<Lion> simbaImGehege = catHouse.findAnimalByName("Simba");
+
+        if (simbaImGehege.isPresent()) {
+            System.out.println("In CatHouse gefunden: " + simbaImGehege.get().name());
+        } else {
+            System.out.println("Simba wurde im CatHouse nicht gefunden.");
+        }
+
+        Optional<Animal> haiImZoo = zoo.findAnimalByName("Hai Harald");
+
+        if (haiImZoo.isPresent()) {
+            System.out.println("Im Zoo gefunden: " + haiImZoo.get().name());
+        } else {
+            System.out.println("Hai Harald wurde im Zoo nicht gefunden.");
+        }
+
+        Optional<Animal> nichtGefunden = zoo.findAnimalByName("NichtDa");
+
+        if (nichtGefunden.isEmpty()) {
+            System.out.println("NichtDa wurde korrekt nicht gefunden.");
+        }
+
+
+        // =====================================================
+        // Aufgabe 2 und 3: Command, Undo, Redo und Result testen
+        // =====================================================
+
+        System.out.println();
+        System.out.println("----- Aufgabe 2 und 3: Command testen -----");
+
+        Lion leo = new Lion("Leo");
+
+        AddAnimalCommand<Lion> addLeo = new AddAnimalCommand<>(leo);
+        RemoveAnimalCommand<Lion> removeLeo = new RemoveAnimalCommand<>(leo);
+
+        CommandManager<Enclosure<Mammal>> mammalManager = new CommandManager<>();
+
+        System.out.println("Saeugetierhaus vorher: " + mammalHouse.size());
+
+        mammalManager.executeCommand(addLeo, mammalHouse);
+        System.out.println("Nach Add Leo: " + mammalHouse.size());
+
+        mammalManager.undo(mammalHouse);
+        System.out.println("Nach Undo Add Leo: " + mammalHouse.size());
+
+        mammalManager.redo(mammalHouse);
+        System.out.println("Nach Redo Add Leo: " + mammalHouse.size());
+
+        mammalManager.executeCommand(removeLeo, mammalHouse);
+        System.out.println("Nach Remove Leo: " + mammalHouse.size());
+
+        mammalManager.undo(mammalHouse);
+        System.out.println("Nach Undo Remove Leo: " + mammalHouse.size());
+
+        mammalManager.redo(mammalHouse);
+        System.out.println("Nach Redo Remove Leo: " + mammalHouse.size());
+
+
+        // =====================================================
+        // Compiler-Sicherheits-Test
+        // =====================================================
+
+        // Das hier soll NICHT kompilieren, weil Shark kein Mammal ist:
+        // AddAnimalCommand<Shark> addNemo = new AddAnimalCommand<>(new Shark("Nemo"));
+        // mammalManager.executeCommand(addNemo, mammalHouse);
     }
 
     private static void configureLogging(Level level) {
